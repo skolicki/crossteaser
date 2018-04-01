@@ -44,42 +44,28 @@ def move(state, direction):
 
 best_solution = ""
 checked = 0
-visited = {str(initial_state) : ""}  # from initial
-visited2 = {str(final_state) : ""}  # to final
+visited = {}
+visited[str(initial_state)] = {str(initial_state) : ""}  # from initial
+visited[str(final_state)] = {str(final_state) : ""}  # from final
 while True:
     if checked % 1000 == 0:
         print "checked: ", checked, "best solution: ", len(best_solution), " : ", best_solution
-    state = [el for el in initial_state]  # copy
-    solution = ""
-    for i in range(1000):  # forward
-        m = random.choice(['L', 'R', 'U', 'D'])
-        solution += m
-        state = move(state, m)
-        key = str(state)
-        if key not in visited or len(visited[key]) > len(solution):
-            visited[key] = solution
-        else:
-            solution = visited[key]  # shorten, also if equal
-        if key in visited2:
-            candidate = solution + visited2[key]
-            if best_solution == "" or len(candidate) < len(best_solution):
-                best_solution = candidate
-            break
-    state = [el for el in final_state]  # copy
-    solution = ""
-    for i in range(1000):  # backward
-        m_back = random.choice(['L', 'R', 'U', 'D'])
-        m = {'R' : 'L', 'L' : 'R', 'U' : 'D', 'D' : 'U'}.get(m_back)
-        solution = m + solution
-        state = move(state, m_back)
-        key = str(state)
-        if key not in visited2 or len(visited2[key]) > len(solution):
-            visited2[key] = solution
-        else:
-            solution = visited2[key]
-        if key in visited:
-            candidate = visited[key] + solution
-            if best_solution == "" or len(candidate) < len(best_solution):
-                best_solution = candidate
-            break
+    for start_state in [initial_state, final_state]:  # search from both sides
+        state = [el for el in start_state]  # copy
+        solution = ""
+        for i in range(1000):  # forward
+            m = random.choice(['L', 'R', 'U', 'D'])
+            solution += m
+            state = move(state, m)
+            key = str(state)
+            if key not in visited[start_state] or len(visited[start_state][key]) > len(solution):
+                visited[start_state][key] = solution
+            else:
+                solution = visited[start_state][key]  # shorten, also if equal
+            if key in visited[initial_state] and key in visited[final_state]:
+                candidate = visited[initial_state][key] + visited[final_state][key][::-1]  # reverse path to final_state
+                if best_solution == "" or len(candidate) < len(best_solution):
+                    best_solution = candidate
+                break  # NOTE: Optional. If paths are not all analyzed, we can find shorter solution
+                # by concatenating a longer orange with much shorter found later
     checked += 1
