@@ -45,25 +45,25 @@ def move(state, direction):
 best_solution = ""
 checked = 0
 visited = {}
-visited[str(initial_state)] = {str(initial_state) : ""}  # from initial
-visited[str(final_state)] = {str(final_state) : ""}  # from final
+visited["forward"] = {str(initial_state) : ""}  # from initial
+visited["backward"] = {str(final_state) : ""}  # from final
 while True:
     if checked % 1000 == 0:
         print "checked: ", checked, "best solution: ", len(best_solution), " : ", best_solution
-    for start_state in [initial_state, final_state]:  # search from both sides
-        state = [el for el in start_state]  # copy
+    for direction in ["forward", "backward"]:  # search from both sides
+        state = [el for el in initial_state if direction == "forward" else final_state]  # copy
         solution = ""
         for i in range(1000):  # forward
             m = random.choice(['L', 'R', 'U', 'D'])
             solution += m
             state = move(state, m)
             key = str(state)
-            if key not in visited[start_state] or len(visited[start_state][key]) > len(solution):
-                visited[start_state][key] = solution
+            if key not in visited[direction] or len(visited[direction][key]) > len(solution):
+                visited[direction][key] = solution
             else:
-                solution = visited[start_state][key]  # shorten, also if equal
-            if key in visited[initial_state] and key in visited[final_state]:
-                candidate = visited[initial_state][key] + visited[final_state][key][::-1]  # reverse path to final_state
+                solution = visited[direction][key]  # shorten, also if equal
+            if key in visited["forward"] and key in visited["backward"]:
+                candidate = visited["forward"][key] + visited["backward"][key][::-1]  # reverse path to final_state
                 if best_solution == "" or len(candidate) < len(best_solution):
                     best_solution = candidate
                 break  # NOTE: Optional. If paths are not all analyzed, we can find shorter solution
